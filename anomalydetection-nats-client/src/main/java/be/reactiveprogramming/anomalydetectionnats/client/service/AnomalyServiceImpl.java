@@ -40,7 +40,7 @@ public class AnomalyServiceImpl implements AnomalyService {
 
   private boolean isAnomaly(MeasurementEvent measurementEvent) {
     try {
-      Thread.sleep(100); // Let's simulate some work..
+      Thread.sleep(10); // Let's simulate some work..
     } catch (InterruptedException e) {
       e.printStackTrace();
     }

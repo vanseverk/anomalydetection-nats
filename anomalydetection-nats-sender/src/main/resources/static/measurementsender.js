@@ -17,7 +17,8 @@ function startSending() {
 
     subscription = eventSource
         .subscribe(
-            function (n) { return addToLog()}
+            function (n) { return addToLog()},
+            function(e) {}
         );
 }
 

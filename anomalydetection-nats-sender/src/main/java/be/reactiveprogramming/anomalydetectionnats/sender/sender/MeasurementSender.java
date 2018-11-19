@@ -24,9 +24,10 @@ public class MeasurementSender {
    * that will define which number the sent message has. This goes through a flatMap method that calls the sendMeasumentForNumber method along with the number.
    * A random Measurement gets created for a device number between 1 and 10, and this is then sent using the webclient. Because the webclient sends the web request
    * in a non blocking way, we don't have to wait for the result of this call to arrive, so more measurements will get created and sent at the same time.
+   * After the webclient receives a response, the reactive pipeline can continue with it. In this case we simply map the result back to the original number
+   * however, so we create a Stream of numbers again. These numbers will then run through the controller and streamed to the client's browser. Let's now move
+   * to the Gateway application's todos.
    *
-   * After the measurement for a certain number arrives, that number will then be passed on with the "then(Publisher)" method at the and of sendMeasurement, leading
-   * the Reactive pipeline to the Controller.
    */
   public Flux<Integer> sendMeasurement() {
     return Flux.range(1, 10000).flatMap(number -> sendMeasurementForNumber(number));
@@ -37,7 +38,7 @@ public class MeasurementSender {
 
     return wc.method(HttpMethod.POST).uri("measurements")
         .body(BodyInserters.fromPublisher(Mono.just(measurement), MeasurementEvent.class))
-        .exchange().then(Mono.just(number));
+        .exchange().map(r -> number);
   }
 }
 

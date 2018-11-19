@@ -38,6 +38,7 @@ public class MeasurementGatewayImpl implements MeasurementGateway {
    */
   @Override
   public Mono<Void> sendMeasurement(MeasurementEvent measurementEvent) {
+    System.out.println("Measurement to send to NATS: " + measurementEvent);
     return Mono.empty();
   }
 }

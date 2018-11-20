@@ -1,44 +1,38 @@
-package be.reactiveprogramming.anomalydetectionnats.sender.sender;
+package be.reactiveprogramming.anomalydetectionnats.sender.controller;
 
-import be.reactiveprogramming.anomalydetectionnats.common.event.MeasurementEvent;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Random;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
+import be.reactiveprogramming.anomalydetectionnats.sender.sender.MeasurementSender;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-@Service
-public class MeasurementSender {
+@RestController
+public class MeasurementSenderController {
 
-  private final WebClient wc = WebClient.create("http://localhost:8081");
+  private final MeasurementSender measurementSender;
 
-  private final Random r = new Random();
+  public MeasurementSenderController(MeasurementSender measurementSender) {
+    this.measurementSender = measurementSender;
+  }
 
   /**
-   * TODO 02 README: This is where the Flux is created which will take care of sending our measurements. A range of numbers from 1 to 10'000 will be generated
-   * that will define which number the sent message has. This goes through a flatMap method that calls the sendMeasumentForNumber method along with the number.
-   * A random Measurement gets created for a device number between 1 and 10, and this is then sent using the webclient. Because the webclient sends the web request
-   * in a non blocking way, we don't have to wait for the result of this call to arrive, so more measurements will get created and sent at the same time.
-   * After the webclient receives a response, the reactive pipeline can continue with it. In this case we simply map the result back to the original number
-   * however, so we create a Stream of numbers again. These numbers will then run through the controller and streamed to the client's browser. Let's now move
-   * to the Gateway application's todos.
+   * TODO 01 README: This RestController uses Spring WebFlux to offer a "web" part to Project Reactor. When a HTTP call is done to the /sendMeasurements
+   * endpoint, it will trigger the sendMeasurement method on the measurementSender. This will return a Flux with in it the N'th address that was
+   * sent sequentially. This number will flow on through the Flux to the original caller of this method through a HTTP EventStream
    *
+   * When clicking on the "sendMeasurements" button now in the UI you'll get a message "Could not send measurements" because
+   * the gateway is not up yet. We'll start it up soon though.
    */
-  public Flux<Integer> sendMeasurement() {
-    return Flux.range(1, 10000).flatMap(number -> sendMeasurementForNumber(number));
+
+  @PostMapping(value = "/notify/{dest}/amount/{amount}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @ResponseBody
+  public void notifyOtherDevices(@PathVariable("dest") String destination, @PathVariable("amount") int amount) {
+    measurementSender.sendToList(destination, amount);
   }
 
-  private Mono<Integer> sendMeasurementForNumber(int number) {
-    final MeasurementEvent measurement = new MeasurementEvent(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME), "" + r.nextInt(10), BigDecimal.valueOf(r.nextDouble() * 100));
 
-    return wc.method(HttpMethod.POST).uri("measurements")
-        .body(BodyInserters.fromPublisher(Mono.just(measurement), MeasurementEvent.class))
-        .exchange().map(r -> number);
+  @PostMapping(value = "/sendMeasurements/{dest}/amount/{amount}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @ResponseBody
+  public Flux<Integer> eventStream(@PathVariable("amount") int amount, @PathVariable("dest") String destination) {
+    return measurementSender.sendMeasurement(destination, amount);
   }
 }
-

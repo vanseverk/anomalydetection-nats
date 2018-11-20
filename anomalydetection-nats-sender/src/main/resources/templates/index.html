@@ -4,9 +4,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs-dom/7.0.3/rx.dom.js"></script>
 
   <script
-      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-      integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
-      crossorigin="anonymous"></script>
+          src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+          integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+          crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
           crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
@@ -19,6 +19,14 @@
     <div class="col-md-12 panel panel-default">
       <div class="panel-heading"><h2>Measurement sender</h2></div>
       <div class="panel-body">
+        <label for="gatewayIp">Gateway-Ip:</label>
+        <input type="text" id="gatewayIp" value="127.0.0.1">
+        <br/>
+
+        <label for="numberOfMessages">number of messages:</label>
+        <input type="text" id="numberOfMessages" value="10000">
+        <br/>
+
         <button id="startSending">Start sending</button>
         <div>
           <label for="message">Server message</label>

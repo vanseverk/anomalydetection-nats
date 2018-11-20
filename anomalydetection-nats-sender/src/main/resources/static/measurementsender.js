@@ -11,18 +11,9 @@ function startSending() {
     }
     document.getElementById("message").innerHTML = "";
 
-    var eventSource = Rx.DOM.fromEventSource('/sendMeasurements');
-
-    eventSource.doOnError();
-
-    subscription = eventSource
-        .subscribe(
-            function (n) { return addToLog()},
-            function(e) {}
-        );
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "http://localhost:8082/notify/"+document.getElementById("gatewayIp").value+"/amount/"+document.getElementById("numberOfMessages").value, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send();
 }
 
-function addToLog() {
-    numberSent++;
-    document.getElementById("message").innerHTML = "Total number sent: " + numberSent;
-}

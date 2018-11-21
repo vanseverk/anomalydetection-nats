@@ -22,7 +22,7 @@ public class AnomalyServiceImpl implements AnomalyService {
    * For inspiration, be sure to take a look on: https://www.reactiveprogramming.be/project-reactor-flux-sharing/
    */
 
-   //private final Flux<AnomalyEvent> anomalyFlux;
+   private final Flux<AnomalyEvent> anomalyFlux;
 
   /**
    * TODO 09 Every user of the client application will now see the same anomalies Streaming in. However, new users won't see the older anomalies Stream in because they're already "gone".
@@ -44,6 +44,12 @@ public class AnomalyServiceImpl implements AnomalyService {
 
   public AnomalyServiceImpl(AnomalyReceiver anomalyReceiver) {
     this.anomalyReceiver = anomalyReceiver;
+
+    anomalyFlux = anomalyReceiver.streamMeasurements()
+            .filter(f -> isAnomaly(f))
+            .map(f -> new AnomalyEvent(f.getTimestamp(), f.getDeviceId(), "Value too low " + f.getMeasurementValue().toPlainString()))
+            .share()
+            .cache();
   }
 
   /**
@@ -63,7 +69,11 @@ public class AnomalyServiceImpl implements AnomalyService {
    * This way a user will only get information regarding the device he wants information of.
    */
   public Flux<AnomalyEvent> streamAnomalies(Optional<String> deviceId) {
-    return Flux.interval(Duration.ofSeconds(1)).map(n -> new AnomalyEvent("timestamp", "deviceid", "anomaly"));
+    if(deviceId.isPresent()) {
+      return Flux.from(anomalyFlux).filter(f -> f.getDeviceId().equals(deviceId));
+    }
+
+    return Flux.from(anomalyFlux);
   }
 
   private boolean isAnomaly(MeasurementEvent measurementEvent) {

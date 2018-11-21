@@ -19,8 +19,8 @@ public class MeasurementGatewayImpl implements MeasurementGateway {
   private ObjectMapper objectMapper = new ObjectMapper();
 
   public MeasurementGatewayImpl() throws IOException, InterruptedException {
-    //StreamingConnection sc = new StreamingConnectionFactory("test-cluster", "client-" + new Random().nextInt()).createConnection();
-    //sender = ReactiveNatsStreaming.createSender(sc);
+    StreamingConnection sc = new StreamingConnectionFactory("test-cluster", "client-" + new Random().nextInt()).createConnection();
+    sender = ReactiveNatsStreaming.createSender(sc);
   }
 
   private byte[] toBinary(MeasurementEvent body) {
@@ -40,7 +40,6 @@ public class MeasurementGatewayImpl implements MeasurementGateway {
    */
   @Override
   public Mono<Void> sendMeasurement(MeasurementEvent measurementEvent) {
-    System.out.println("Measurement to send to NATS: " + measurementEvent);
-    return Mono.empty();
+    return sender.publish("measurements", toBinary(measurementEvent));
   }
 }

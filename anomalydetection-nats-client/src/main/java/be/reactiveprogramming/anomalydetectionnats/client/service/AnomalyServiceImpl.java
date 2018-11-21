@@ -29,6 +29,8 @@ public class AnomalyServiceImpl implements AnomalyService {
    * Let's try to keep an internal in our anomalyFlux so new Fluxes connecting to it will also receive some of its historical information. You can find more information on how to do so in
    *
    * https://www.reactiveprogramming.be/project-reactor-flux-caching/
+   *
+   * After you've applied caching, try to reload your client page, or browse to it with muliple browsers to verify this works.
    */
 
   /**
@@ -45,7 +47,7 @@ public class AnomalyServiceImpl implements AnomalyService {
   }
 
   /**
-   * TODO 07 For our application we're interested in detecting anomalies in measurements. When the measurement value is lower than 2 we want to send a new AnomalyEvent with the text
+   * TODO 07 For our application we're interested in detecting anomalies in measurements. When the measurement value is lower than 20 we want to send a new AnomalyEvent with the text
    * "Value too low {measurement value}" to the user. The deviceId and timestamp can just be copied from the measurementevent it originated from.
    *
    * These MeasurementEvents will be streamed from NATS. We'll be using an "auto acknowledge" method, because we just want to display the information and don't need to do any important
@@ -65,7 +67,7 @@ public class AnomalyServiceImpl implements AnomalyService {
   }
 
   private boolean isAnomaly(MeasurementEvent measurementEvent) {
-    return measurementEvent.getMeasurementValue().compareTo(BigDecimal.valueOf(2)) < 1;
+    return measurementEvent.getMeasurementValue().compareTo(BigDecimal.valueOf(20)) < 1;
   }
 
 }

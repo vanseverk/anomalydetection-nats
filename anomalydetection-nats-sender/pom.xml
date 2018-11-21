@@ -11,6 +11,7 @@
 	<name>anomalydetection-nats-sender</name>
 	<description>Test sender for anomalydetection application</description>
 
+
 	<parent>
 		<groupId>be.reactiveprogramming.anomalydetectionnats</groupId>
 		<artifactId>anomalydetection-nats</artifactId>
@@ -64,6 +65,11 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 	</dependencies>
+
+
+
+
+
 
 	<build>
 		<plugins>

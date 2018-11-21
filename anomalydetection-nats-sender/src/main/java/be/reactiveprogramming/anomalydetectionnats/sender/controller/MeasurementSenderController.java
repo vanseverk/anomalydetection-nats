@@ -2,9 +2,7 @@ package be.reactiveprogramming.anomalydetectionnats.sender.controller;
 
 import be.reactiveprogramming.anomalydetectionnats.sender.sender.MeasurementSender;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 @RestController
@@ -25,10 +23,9 @@ public class MeasurementSenderController {
    * the gateway is not up yet. We'll start it up soon though.
    */
 
-  @GetMapping(value = "/sendMeasurements", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @GetMapping(value = "/sendMeasurements/{dest}/amount/{amount}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   @ResponseBody
-  public Flux<Integer> eventStream() {
-    return measurementSender.sendMeasurement();
+  public Flux<Integer> eventStream(@PathVariable("amount") int amount, @PathVariable("dest") String destination) {
+    return measurementSender.sendMeasurement(destination, amount);
   }
-
 }

@@ -11,9 +11,18 @@ function startSending() {
     }
     document.getElementById("message").innerHTML = "";
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://localhost:8082/notify/"+document.getElementById("gatewayIp").value+"/amount/"+document.getElementById("numberOfMessages").value, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send();
+    var eventSource = Rx.DOM.fromEventSource("/sendMeasurements/"+document.getElementById("gatewayIp").value+"/amount/"+document.getElementById("numberOfMessages").value);
+
+    eventSource.doOnError();
+
+    subscription = eventSource
+        .subscribe(
+            function (n) { return addToLog()},
+            function(e) {}
+        );
 }
 
+function addToLog() {
+    numberSent++;
+    document.getElementById("message").innerHTML = "Total number sent: " + numberSent;
+}

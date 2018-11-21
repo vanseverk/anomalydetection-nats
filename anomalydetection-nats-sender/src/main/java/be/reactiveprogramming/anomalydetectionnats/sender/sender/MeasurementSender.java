@@ -1,38 +1,58 @@
-package be.reactiveprogramming.anomalydetectionnats.sender.controller;
+package be.reactiveprogramming.anomalydetectionnats.sender.sender;
 
-import be.reactiveprogramming.anomalydetectionnats.sender.sender.MeasurementSender;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import be.reactiveprogramming.anomalydetectionnats.common.event.MeasurementEvent;
+
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-@RestController
-public class MeasurementSenderController {
+@Service
+public class MeasurementSender {
 
-  private final MeasurementSender measurementSender;
 
-  public MeasurementSenderController(MeasurementSender measurementSender) {
-    this.measurementSender = measurementSender;
-  }
+  private WebClient wc;
 
+  private final Random r = new Random();
+
+  private String ipList[]=new String[1];
   /**
-   * TODO 01 README: This RestController uses Spring WebFlux to offer a "web" part to Project Reactor. When a HTTP call is done to the /sendMeasurements
-   * endpoint, it will trigger the sendMeasurement method on the measurementSender. This will return a Flux with in it the N'th address that was
-   * sent sequentially. This number will flow on through the Flux to the original caller of this method through a HTTP EventStream
+   * TODO 02 README: This is where the Flux is created which will take care of sending our measurements. A range of numbers from 1 to 10'000 will be generated
+   * that will define which number the sent message has. This goes through a flatMap method that calls the sendMeasumentForNumber method along with the number.
+   * A random Measurement gets created for a device number between 1 and 10, and this is then sent using the webclient. Because the webclient sends the web request
+   * in a non blocking way, we don't have to wait for the result of this call to arrive, so more measurements will get created and sent at the same time.
+   * After the webclient receives a response, the reactive pipeline can continue with it. In this case we simply map the result back to the original number
+   * however, so we create a Stream of numbers again. These numbers will then run through the controller and streamed to the client's browser. Let's now move
+   * to the Gateway application's todos.
    *
-   * When clicking on the "sendMeasurements" button now in the UI you'll get a message "Could not send measurements" because
-   * the gateway is not up yet. We'll start it up soon though.
    */
+  public Flux<Integer> sendMeasurement(String destination, int amount) {
+    System.out.println("hier");
+    this.wc = WebClient.create("http://"+destination+":8081");
+    return Flux.range(1, amount).flatMap(number -> sendMeasurementForNumber(number));
+  }
 
-  @PostMapping(value = "/notify/{dest}/amount/{amount}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  @ResponseBody
-  public void notifyOtherDevices(@PathVariable("dest") String destination, @PathVariable("amount") int amount) {
-    measurementSender.sendToList(destination, amount);
+  private Mono<Integer> sendMeasurementForNumber(int number) {
+
+    final MeasurementEvent measurement = new MeasurementEvent(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME), "" + r.nextInt(10), BigDecimal.valueOf(r.nextDouble() * 100));
+
+    return wc.method(HttpMethod.POST).uri("measurements")
+            .body(BodyInserters.fromPublisher(Mono.just(measurement), MeasurementEvent.class))
+            .exchange().map(r -> number);
   }
 
 
-  @PostMapping(value = "/sendMeasurements/{dest}/amount/{amount}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  @ResponseBody
-  public Flux<Integer> eventStream(@PathVariable("amount") int amount, @PathVariable("dest") String destination) {
-    return measurementSender.sendMeasurement(destination, amount);
-  }
 }
+

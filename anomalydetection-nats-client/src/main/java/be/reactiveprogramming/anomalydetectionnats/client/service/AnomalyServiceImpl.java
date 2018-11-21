@@ -70,7 +70,7 @@ public class AnomalyServiceImpl implements AnomalyService {
    */
   public Flux<AnomalyEvent> streamAnomalies(Optional<String> deviceId) {
     if(deviceId.isPresent()) {
-      return Flux.from(anomalyFlux).filter(f -> f.getDeviceId().equals(deviceId));
+      return Flux.from(anomalyFlux).filter(f -> f.getDeviceId().equals(deviceId.get()));
     }
 
     return Flux.from(anomalyFlux);

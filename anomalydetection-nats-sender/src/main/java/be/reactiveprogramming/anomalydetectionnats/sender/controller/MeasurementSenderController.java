@@ -15,12 +15,14 @@ public class MeasurementSenderController {
   }
 
   /**
-   * TODO 01 README: This RestController uses Spring WebFlux to offer a "web" part to Project Reactor. When a HTTP call is done to the /sendMeasurements
-   * endpoint, it will trigger the sendMeasurement method on the measurementSender. This will return a Flux with in it the N'th address that was
-   * sent sequentially. This number will flow on through the Flux to the original caller of this method through a HTTP EventStream
+   * TODO 01 README: We'll be using the MeasurementSender application to imitate a large amount of IoT devices. It will be controlled
+   * through a webpage that sends this MeasurementController an HTTP call.
    *
-   * When clicking on the "sendMeasurements" button now in the UI you'll get a message "Could not send measurements" because
-   * the gateway is not up yet. We'll start it up soon though.
+   * This RestController uses Spring WebFlux to offer a "web" part to Project Reactor. When a HTTP call is done to the /sendMeasurements
+   * endpoint, it will trigger the sendMeasurement method on the measurementSender. This will return a Flux with in it the number of the message that was sent.
+   * This number will flow on through the Flux to the client's browser through a HTTP EventStream/SSE.
+   *
+   * When clicking on the "sendMeasurements" button in the UI nothing will happen yet because the gateway application isn't started up yet.
    */
 
   @GetMapping(value = "/sendMeasurements/{dest}/amount/{amount}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

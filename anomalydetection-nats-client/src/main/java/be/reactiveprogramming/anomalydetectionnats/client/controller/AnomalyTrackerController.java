@@ -20,8 +20,9 @@ public class AnomalyTrackerController {
   }
 
   /**
-   * TODO 06 README: We'll be using this anomalyTrackerController so users can get an eventstream of anomalies. You can try to run this application
-   * and go to http://localhost:8085 to see some "fake" anomalies running in. Open your developer console in your browser. Can you see which transport mechanism is used?
+   * TODO 06 README: We'll be using this anomalyTrackerController so users can get an EventStream/SSE of anomalies. You can try to run this application
+   * and go to http://localhost:8085 to see some "fake" anomalies running in.
+   *
    * In case you're interested in some workings of Spring Webflux, be sure to take a look at https://www.reactiveprogramming.be/spring-webflux-servlet-api/
    */
   @GetMapping(value = "/anomalytracker/anomalies", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

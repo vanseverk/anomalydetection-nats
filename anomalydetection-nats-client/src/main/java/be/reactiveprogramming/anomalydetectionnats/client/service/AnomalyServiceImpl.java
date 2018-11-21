@@ -27,6 +27,7 @@ public class AnomalyServiceImpl implements AnomalyService {
   /**
    * TODO 09 Every user of the client application will now see the same anomalies Streaming in. However, new users won't see the older anomalies Stream in because they're already "gone".
    * Let's try to keep an internal in our anomalyFlux so new Fluxes connecting to it will also receive some of its historical information. You can find more information on how to do so in
+   *
    * https://www.reactiveprogramming.be/project-reactor-flux-caching/
    */
 
@@ -34,7 +35,7 @@ public class AnomalyServiceImpl implements AnomalyService {
    * TODO 11 An important concept in Reactive Programming is that of Backpressure. It will help a Reactive Stream to decide what to do with new information when dealing with a slow consumer.
    * The processing in our application will go fast, but let's make it slower by adding a sleep of 10ms in the "isAnomaly" method.
    * Because we're dealing with a constant flow of new measurements and we're only interested in the latest ones, let's apply a backpressure strategy to the Flux.
-   * We'll keep up to 10000 MeasurementEvents stored up in case of backpressure, and additional ones should be dropped in a "oldest first" fashion.
+   * We'll keep up to 1000 MeasurementEvents stored up in case of backpressure, and additional ones should be dropped in a "oldest first" fashion.
    *
    * A great article on the subject of backpressure can be found on: https://www.reactiveprogramming.be/project-reactor-backpressure/
    */
@@ -54,7 +55,10 @@ public class AnomalyServiceImpl implements AnomalyService {
    * Now let's move to the next implementation step, showing the users some actual anomalies. We'll use the AnomalyReceiver to get a stream of measurements from the NATS server.
    * Use the "isAnomaly" method to filter out the measurements which are in fact anomalies. Afterwards, you can use the map method on the Flux to map these measurementEvents to anomalyEvents.
    *
-   * TODO 10 If you haven't yet, add an extra filter on the deviceId. This way a user will only get information regarding the device he wants information of.
+   * To get a Flux of messages of Kafka, use the receive method along with the subject "anomalies".
+   *
+   * TODO 10 If you haven't yet, add an extra filter on the Flux requested by a user, so they only receive anomalies for a specified deviceId.
+   * This way a user will only get information regarding the device he wants information of.
    */
   public Flux<AnomalyEvent> streamAnomalies(Optional<String> deviceId) {
     return Flux.interval(Duration.ofSeconds(1)).map(n -> new AnomalyEvent("timestamp", "deviceid", "anomaly"));

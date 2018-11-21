@@ -32,9 +32,11 @@ public class MeasurementGatewayImpl implements MeasurementGateway {
   }
 
   /**
-   * TODO 05 Right now this method just prints out the measurement value, but we want it to be sent to NATS instead. Uncomment the lines in the constructor
-   * and use the sender to send the measurement to the "measurements" subject on NATS. This will add the event to the eventLog of the topic "measurements".
-   * The sender will send in a non-blocking way, this means it will give a Mono<Void> as a result, enabling you to add it to your Reactive pipeline.
+   * TODO 05 Right now this method just prints out the measurement value, but we want a measurement to be sent to NATS instead.
+   * Uncomment the lines in the constructor and use the sender to send the measurement to the "measurements" subject on NATS.
+   * This subject will be created for us automatically the moment we first send a message to it. This will add the event to the eventLog of the topic "measurements".
+   * The sender will send in a non-blocking way, so the Reactive Stream will continue the moment NATS confirms
+   * the message arrival.
    */
   @Override
   public Mono<Void> sendMeasurement(MeasurementEvent measurementEvent) {

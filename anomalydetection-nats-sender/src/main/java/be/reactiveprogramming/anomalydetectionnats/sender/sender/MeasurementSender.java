@@ -22,7 +22,6 @@ import reactor.core.publisher.Mono;
 @Service
 public class MeasurementSender {
 
-  private WebClient wc;
 
   private final Random r = new Random();
 
@@ -40,19 +39,17 @@ public class MeasurementSender {
    *
    */
   public Flux<Integer> sendMeasurement(String destination, int amount) {
-    this.wc = WebClient.create("http://"+destination+":8081");
-    return Flux.range(1, amount).flatMap(number -> sendMeasurementForNumber(number));
+    final WebClient wc = WebClient.create("http://"+destination+":8081");
+    return Flux.range(1, amount).flatMap(number -> {
+
+      final MeasurementEvent measurement = new MeasurementEvent(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME), "" + r.nextInt(10), BigDecimal.valueOf(r.nextDouble() * 100));
+
+      return wc.method(HttpMethod.POST).uri("measurements")
+              .body(BodyInserters.fromPublisher(Mono.just(measurement), MeasurementEvent.class))
+              .exchange().map(r -> number);
+
+    });
   }
-
-  private Mono<Integer> sendMeasurementForNumber(int number) {
-
-    final MeasurementEvent measurement = new MeasurementEvent(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME), "" + r.nextInt(10), BigDecimal.valueOf(r.nextDouble() * 100));
-
-    return wc.method(HttpMethod.POST).uri("measurements")
-            .body(BodyInserters.fromPublisher(Mono.just(measurement), MeasurementEvent.class))
-            .exchange().map(r -> number);
-  }
-
 
 }
 

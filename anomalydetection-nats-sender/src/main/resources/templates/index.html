@@ -20,12 +20,13 @@
       <div class="panel-heading"><h2>Measurement sender</h2></div>
       <div class="panel-body">
         <label for="gatewayIp">Gateway-Ip:</label>
-        <input type="text" id="gatewayIp" value="127.0.0.1">
+        <input type="text" id="gatewayIp" value="" oninput="changeNumberOfMessages()">
         <br/>
 
         <label for="numberOfMessages">number of messages:</label>
-        <input type="text" id="numberOfMessages" value="10000">
+        <input type="text" id="numberOfMessages" value="10000" oninput="changeNumberOfMessages()">
         <br/>
+        <p id="errorMessage" ></p>
 
         <button id="startSending">Start sending</button>
         <div>
